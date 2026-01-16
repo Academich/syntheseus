@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "syntheseus"
 authors = [  # Note: PyPI does not support multiple authors with email addresses included.
@@ -11,86 +7,29 @@ authors = [  # Note: PyPI does not support multiple authors with email addresses
     {name = "Megan Stanley"},      # meganstanley@microsoft.com
     {name = "Marwin Segler"},      # marwinsegler@microsoft.com
 ]
-description = "A package for retrosynthetic planning."
-readme = "README.md"
-requires-python = ">=3.8"
-license = {file = "LICENSE"}
-dynamic = ["version"]
-dependencies = [
-    "more_itertools",       # reaction_prediction
-    "networkx",             # search
-    "numpy",                # reaction_prediction, search
-    "omegaconf",            # reaction_prediction
-    "rdkit",                # reaction_prediction, search
-    "tqdm",                 # reaction_prediction
-]
+requires-python = ">=3.9,<3.10"
+version = "0.1.0"
+dependencies = [ "more-itertools>=10.8.0,<11", "networkx>=3.2.1,<4", "rdkit>=2025.9.2,<2026", "tqdm>=4.67.1,<5", "pillow>=11.3.0,<12", "graphviz>=0.21,<0.22"]
 
-[project.optional-dependencies]
-viz = [
-  "pillow",
-  "graphviz"
-]
-dev = [
-  "pytest",
-  "pytest-cov",
-  "pytest-rerunfailures",
-  "pre-commit"
-]
-chemformer = ["syntheseus-chemformer==0.3.0"]
-graph2edits = ["syntheseus-graph2edits==0.2.0"]
-local-retro = ["syntheseus-local-retro==0.5.0"]
-megan = ["syntheseus-megan==0.2.0"]
-mhn-react = ["syntheseus-mhnreact==1.0.0"]
-retro-knn = ["syntheseus[local-retro]"]
-root-aligned = ["syntheseus-root-aligned==0.2.0"]
-all-single-step = [
-  "syntheseus[chemformer,graph2edits,local-retro,megan,mhn-react,retro-knn,root-aligned]"
-]
-all = [
-  "syntheseus[viz,dev,all-single-step]"
-]
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
 
-[project.urls]
-Documentation = "https://microsoft.github.io/syntheseus"
-Repository = "https://github.com/microsoft/syntheseus"
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
 
-[project.scripts]
-syntheseus = "syntheseus.cli.main:main"
+[tool.pixi.pypi-dependencies]
+syntheseus = { path = ".", editable = true }
 
-[tool.setuptools.packages.find]
-# Guidance from: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-where = ["."]
-include = ["syntheseus*"]
-exclude = ["syntheseus.tests*"]
-namespaces = false
+[tool.pixi.tasks]
 
-[tool.setuptools.package-data]
-"syntheseus" = ["py.typed"]
+[tool.pixi.dependencies]
+graphviz = ">=14.1.0,<15"
 
-[tool.setuptools_scm]
+[tool.pixi.environments]
+default = { solve-group = "default" }
+local-retro = { features = ["local-retro"], solve-group = "default" }
 
-[tool.black]
-line-length = 100
-include = '\.pyi?$'
-
-[tool.mypy]
-python_version = 3.9  # pin modern python version
-ignore_missing_imports = true
-
-[tool.ruff]
-line-length = 100
-# Check https://beta.ruff.rs/docs/rules/ for full list of rules
-lint.select = [
-  "E", "W",  # pycodestyle
-  "F",  # Pyflakes
-  "I",  # isort
-  "NPY201",  # check for functions/constants deprecated in numpy 2.*
-]
-lint.ignore = [
-  # W605: invalid escape sequence -- triggered by pseudo-LaTeX in comments
-  "W605",
-  # E501: Line too long -- triggered by comments and such. black deals with shortening.
-  "E501",
-  # E741:  Do not use variables named 'l', 'o', or 'i' -- disagree with PEP8
-  "E741",
-]
+[dependency-groups]
+local-retro = ["syntheseus-local-retro @ git+https://github.com/kmaziarz/LocalRetro.git", "numpy<2"]
