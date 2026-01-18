@@ -32,3 +32,5 @@ MANIFEST
 # Unit test / coverage reports
 .coverage
 .coverage.*
+# pixi environments
+.pixi

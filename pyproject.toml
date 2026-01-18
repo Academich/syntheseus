@@ -7,25 +7,33 @@ authors = [  # Note: PyPI does not support multiple authors with email addresses
     {name = "Megan Stanley"},      # meganstanley@microsoft.com
     {name = "Marwin Segler"},      # marwinsegler@microsoft.com
 ]
-requires-python = ">=3.9,<3.10"
 version = "0.1.0"
-dependencies = [ "more-itertools>=10.8.0,<11", "networkx>=3.2.1,<4", "rdkit>=2025.9.2,<2026", "tqdm>=4.67.1,<5", "pillow>=11.3.0,<12", "graphviz>=0.21,<0.22"]
-
-[build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
 
-[tool.pixi.pypi-dependencies]
-syntheseus = { path = ".", editable = true }
+[system-requirements]
+cuda="11.8"
 
-[tool.pixi.tasks]
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
 
 [tool.pixi.dependencies]
+python = ">=3.9,<3.10"
 graphviz = ">=14.1.0,<15"
+
+[tool.pixi.pypi-dependencies]
+torch = { version = ">=2.2.0,<2.3.0", index = "https://download.pytorch.org/whl/cu118"}
+more-itertools = ">=10.8.0,<11"
+networkx = ">=3.2.1,<4"
+rdkit = ">=2025.9.2,<2026"
+tqdm = ">=4.67.1,<5"
+pillow = ">=11.3.0,<12"
+omegaconf = ">=2.3.0,<3"
+graphviz = ">=0.21,<0.22"
+syntheseus = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
@@ -33,3 +41,9 @@ local-retro = { features = ["local-retro"], solve-group = "default" }
 
 [dependency-groups]
 local-retro = ["syntheseus-local-retro @ git+https://github.com/kmaziarz/LocalRetro.git", "numpy<2"]
+
+[tool.pixi.feature.local-retro.pypi-dependencies]
+dgl = { url = "https://data.dgl.ai/wheels/torch-2.2/cu118/dgl-2.4.0%2Bcu118-cp39-cp39-manylinux1_x86_64.whl" }
+
+[project.scripts]
+syntheseus = "syntheseus.cli.main:main"
