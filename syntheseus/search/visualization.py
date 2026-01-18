@@ -46,11 +46,12 @@ def _write_graphviz_graph(
     filename: str,
 ) -> None:
     # Init visualization graph
-    if not filename.endswith(".pdf"):
-        raise ValueError("Filename must end in .pdf")
+    if not filename.endswith(".png"):
+        raise ValueError("Filename must end in .png")
     dotfile_name = filename[:-4]
-    G = Digraph("G", filename=dotfile_name)  # strip .pdf
-    G.format = "pdf"
+    G = Digraph("G", filename=dotfile_name)  # strip .png
+    G.format = "png"
+    G.attr(rankdir="RL")  # Set horizontal orientation (right-to-left)
 
     # Draw nodes and edges
     for node in nodes:
@@ -66,7 +67,7 @@ def _write_graphviz_graph(
     for edge in edges:
         G.edge(edge[0], edge[1], label="")
 
-    # Make pdf
+    # Make png
     G.render()
 
     # Remove intermediate dot file
@@ -85,7 +86,7 @@ def visualize_andor(
 
     Args:
         graph: The graph to visualize.
-        filename: The filename to save the visualization to. Must end in ".pdf"
+        filename: The filename to save the visualization to. Must end in ".png"
         nodes: The nodes to include in the visualization. If None, all nodes are included.
         draw_mols: Whether to draw the molecules in the graph.
     """
@@ -103,8 +104,10 @@ def visualize_andor(
     for node in subgraph.nodes:
         rows: list[str] = []
         if isinstance(node, OrNode):
-            border_color = PURCHASABLE if node.mol.metadata["is_purchasable"] else NOT_PURCHASABLE
-            shape = "ellipse"
+            border_color = (
+                PURCHASABLE if node.mol.metadata["is_purchasable"] else NOT_PURCHASABLE
+            )
+            shape = "box"
             if draw_mols and node.mol.smiles != "":
                 img_file = _mol_to_image(Chem.MolFromSmiles(node.mol.smiles))
                 temp_files.append(img_file)
@@ -120,8 +123,8 @@ def visualize_andor(
             raise TypeError(f"Unknown node type {type(node)}")
 
         # Metadata
-        node_data_str = pprint.pformat(node.data).replace("\n", "<BR/>")
-        rows.append(f"<TD>{node_data_str}</TD>")
+        # node_data_str = pprint.pformat(node.data).replace("\n", "<BR/>")
+        # rows.append(f"<TD>{node_data_str}</TD>")
 
         # Make label
         label = '<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">'
@@ -158,7 +161,7 @@ def visualize_molset(
 
     Args:
         graph: The graph to visualize.
-        filename: The filename to save the visualization to. Must end in ".pdf"
+        filename: The filename to save the visualization to. Must end in ".png"
         nodes: The nodes to include in the visualization. If None, all nodes are included.
         draw_mols: Whether to draw the molecules in the graph.
     """
@@ -193,8 +196,8 @@ def visualize_molset(
                 rows.append(f"<TD>SMILES: {mol.smiles}</TD>")
 
         # Metadata
-        node_data_str = pprint.pformat(node.data).replace("\n", "<BR/>")
-        rows.append(f"<TD>{node_data_str}</TD>")
+        # node_data_str = pprint.pformat(node.data).replace("\n", "<BR/>")
+        # rows.append(f"<TD>{node_data_str}</TD>")
 
         # Make label
         label = '<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">'
@@ -207,7 +210,7 @@ def visualize_molset(
                 id=str(id(node)),
                 label=label,
                 border_color=border_color,
-                shape="ellipse",
+                shape="box",
             )
         )
 

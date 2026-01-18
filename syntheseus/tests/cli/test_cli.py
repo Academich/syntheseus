@@ -12,7 +12,9 @@ import omegaconf
 import pytest
 
 from syntheseus.reaction_prediction.inference.config import BackwardModelClass
-from syntheseus.reaction_prediction.utils.testing import are_single_step_models_installed
+from syntheseus.reaction_prediction.utils.testing import (
+    are_single_step_models_installed,
+)
 
 pytestmark = pytest.mark.skipif(
     not are_single_step_models_installed(),
@@ -84,7 +86,8 @@ def test_cli_invalid(
         ["not-a-real-command"],
         eval_cli_argv + ["model_class=LocalRetro"],  # No data dir.
         eval_cli_argv + ["model_class=LocalRetro", f"data_dir={tmpdir}"],  # No data.
-        eval_cli_argv + ["model_class=FakeModel", f"data_dir={data_dir}"],  # Not a real model.
+        eval_cli_argv
+        + ["model_class=FakeModel", f"data_dir={data_dir}"],  # Not a real model.
         search_cli_argv
         + [
             "model_class=LocalRetro",
@@ -110,7 +113,10 @@ def test_cli_invalid(
 
 @pytest.mark.parametrize("model_class", MODEL_CLASSES_TO_TEST)
 def test_cli_eval_single_step(
-    model_class: BackwardModelClass, data_dir: Path, tmpdir: Path, eval_cli_argv: List[str]
+    model_class: BackwardModelClass,
+    data_dir: Path,
+    tmpdir: Path,
+    eval_cli_argv: List[str],
 ) -> None:
     run_cli_with_argv(
         eval_cli_argv
@@ -166,4 +172,4 @@ def test_cli_search(
 
     # Assert that a solution was found.
     assert results["soln_time_rxn_model_calls"] < math.inf
-    assert len(glob.glob(f"{results_dir}/route_*.pdf")) >= 1
+    assert len(glob.glob(f"{results_dir}/route_*.png")) >= 1

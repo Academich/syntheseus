@@ -26,7 +26,7 @@ def test_andor_visualization(
     with tempfile.TemporaryDirectory() as tmp_dir:
         visualization.visualize_andor(
             graph=andor_graph_non_minimal,
-            filename=f"{tmp_dir}/tmp.pdf",
+            filename=f"{tmp_dir}/tmp.png",
             draw_mols=draw_mols,
             nodes=nodes,
         )
@@ -44,17 +44,17 @@ def test_molset_visualization(
     with tempfile.TemporaryDirectory() as tmp_dir:
         visualization.visualize_molset(
             graph=molset_tree_non_minimal,
-            filename=f"{tmp_dir}/tmp.pdf",
+            filename=f"{tmp_dir}/tmp.png",
             draw_mols=draw_mols,
             nodes=nodes,
         )
 
 
-def test_filename_ends_with_pdf(
+def test_filename_ends_with_png(
     molset_tree_non_minimal: MolSetGraph,
     andor_graph_non_minimal: AndOrGraph,
 ) -> None:
-    """Test that an error is raised if the file name doesn't end in .pdf"""
+    """Test that an error is raised if the file name doesn't end in .png"""
 
     with pytest.raises(ValueError):
         visualization.visualize_andor(

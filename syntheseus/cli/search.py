@@ -377,7 +377,7 @@ def run_from_config(config: SearchConfig) -> Path:
 
                 visualize_kwargs: Dict[str, Any] = dict(
                     graph=output_graph,
-                    filename=str(results_dir / f"route_{route_idx}.pdf"),
+                    filename=str(results_dir / f"route_{route_idx}.png"),
                     nodes=route,
                 )
 
