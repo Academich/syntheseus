@@ -39,10 +39,12 @@ syntheseus = { path = ".", editable = true }
 default = { solve-group = "default" }
 local-retro = { features = ["local-retro"], solve-group = "default" }
 root-aligned = { features = ["root-aligned"], solve-group = "default" }
+graph2edits = { features = ["graph2edits"], solve-group = "default" }
 
 [dependency-groups]
 local-retro = ["syntheseus-local-retro @ git+https://github.com/kmaziarz/LocalRetro.git", "numpy<2"]
 root-aligned = ["syntheseus-root-aligned @ git+https://github.com/kmaziarz/RootAligned.git", "pandas<2.2"]
+graph2edits = ["syntheseus-graph2edits @ git+https://github.com/kmaziarz/Graph2Edits.git", "joblib>=1.5.3,<2"]
 
 [tool.pixi.feature.local-retro.pypi-dependencies]
 dgl = { url = "https://data.dgl.ai/wheels/torch-2.2/cu118/dgl-2.4.0%2Bcu118-cp39-cp39-manylinux1_x86_64.whl" }
