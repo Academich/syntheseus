@@ -43,6 +43,15 @@ This sample environment pins `torch` to version `2.2.2`. To run the models under
 
 See [here](https://microsoft.github.io/syntheseus/stable/installation) if you prefer a more lightweight installation that only includes the parts you actually need.
 
+## Running planning example
+```bash
+syntheseus search search_targets_file=target_data/five.smi \
+    inventory_smiles_file=bb_data/building_blocks_em_sa_ln.smi \
+    search_algorithm=retro_star \
+    model_class=LocalRetro \
+    time_limit_s=15
+```
+
 ## Citation and usage
 
 Since the release of our package, we've been thrilled to see syntheseus be used in the following projects:
