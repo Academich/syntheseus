@@ -21,7 +21,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.pixi.dependencies]
-python = ">=3.9,<3.10"
+python = ">=3.10,<3.13"
 graphviz = ">=14.1.0,<15"
 
 [tool.pixi.pypi-dependencies]

@@ -6,6 +6,7 @@ from syntheseus.reaction_prediction.inference.megan import MEGANModel
 from syntheseus.reaction_prediction.inference.mhnreact import MHNreactModel
 from syntheseus.reaction_prediction.inference.retro_knn import RetroKNNModel
 from syntheseus.reaction_prediction.inference.root_aligned import RootAlignedModel
+from syntheseus.reaction_prediction.inference.smiles_medusa import SmilesMedusaModel
 from syntheseus.reaction_prediction.inference.toy_models import (
     LinearMoleculesToyModel,
     ListOfReactionsToyModel,
@@ -22,4 +23,5 @@ __all__ = [
     "MHNreactModel",
     "RetroKNNModel",
     "RootAlignedModel",
+    "SmilesMedusaModel",
 ]

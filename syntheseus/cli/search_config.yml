@@ -45,12 +45,22 @@ mcts:
       temperature: 8.0
     value_function_kwargs:
       constant: 0.5
+  SmilesMedusa:
+    bound_constant: 1
+    policy_kwargs:
+      temperature: 8.0
+    value_function_kwargs:
+      constant: 0.5
 retro_star:
   MEGAN:
     and_node_cost_fn_kwargs:
       clip_probability_max: 0.99
       clip_probability_min: 1.0e-05
   RootAligned:
+    and_node_cost_fn_kwargs:
+      clip_probability_max: 0.9999
+      clip_probability_min: 1.0e-08
+  SmilesMedusa:
     and_node_cost_fn_kwargs:
       clip_probability_max: 0.9999
       clip_probability_min: 1.0e-08

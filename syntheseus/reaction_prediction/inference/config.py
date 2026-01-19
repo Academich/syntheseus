@@ -13,6 +13,7 @@ from syntheseus.reaction_prediction.inference import (
     MHNreactModel,
     RetroKNNModel,
     RootAlignedModel,
+    SmilesMedusaModel,
 )
 
 
@@ -29,6 +30,7 @@ class BackwardModelClass(Enum):
     MHNreact = MHNreactModel
     RetroKNN = RetroKNNModel
     RootAligned = RootAlignedModel
+    SmilesMedusa = SmilesMedusaModel
 
 
 @dataclass
