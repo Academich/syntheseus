@@ -7,8 +7,6 @@ from syntheseus.reaction_prediction.utils.inference import (
     process_raw_smiles_outputs_backwards,
 )
 from typing import Sequence, List, cast
-from syntheseus.reaction_prediction.models.smiles_medusa.model import SmilesToSmilesAutoregressiveMedusaModel
-from syntheseus.reaction_prediction.models.smiles_medusa.tokenizer import InplaceSMILESTokenizer
 
 class SmilesMedusaModel(ExternalBackwardReactionModel):
     def __init__(self, *args, **kwargs) -> None:
@@ -19,6 +17,9 @@ class SmilesMedusaModel(ExternalBackwardReactionModel):
 
         chkpt_path = get_unique_file_in_dir(self.model_dir, pattern="*.ckpt")
         vocab_path = get_unique_file_in_dir(self.model_dir, pattern="*.json")
+
+        from syntheseus.reaction_prediction.models.smiles_medusa.model import SmilesToSmilesAutoregressiveMedusaModel
+        from syntheseus.reaction_prediction.models.smiles_medusa.tokenizer import InplaceSMILESTokenizer
 
         self.tokenizer = InplaceSMILESTokenizer()
         self.tokenizer.load_vocab(vocab_path)
