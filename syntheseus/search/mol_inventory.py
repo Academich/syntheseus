@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from rdkit import Chem
+from rdkit.Chem import inchi
 
 from syntheseus.interface.molecule import Molecule
 
@@ -86,3 +87,48 @@ class SmilesListInventory(ExplicitMolInventory):
         """Load the inventory SMILES from a file."""
         with open(path, "rt") as f_inventory:
             return cls([line.strip() for line in f_inventory], **kwargs)
+
+
+class InChiKeyListInventory(ExplicitMolInventory):
+    """Inventory of purchasable molecules represented by InChIKeys.
+
+    This is useful when the building blocks are provided as InChIKeys rather than SMILES.
+    """
+
+    def __init__(self, inchikey_list: list[str], **_: object):
+        # InChIKeys are already canonical identifiers, so we just store the stripped keys.
+        self._inchikey_set = {ikey.strip() for ikey in inchikey_list if ikey.strip()}
+
+    def is_purchasable(self, mol: Molecule) -> bool:
+        if mol.identifier is not None:
+            warnings.warn(
+                f"Molecule identifier {mol.identifier} will be ignored during inventory lookup"
+            )
+
+        try:
+            ikey = inchi.MolToInchiKey(mol.rdkit_mol)
+        except Exception as e:  # pragma: no cover - defensive, hard to trigger reliably
+            warnings.warn(f"Could not compute InChIKey for molecule '{mol.smiles}': {e}")
+            return False
+
+        return ikey in self._inchikey_set
+
+    def to_purchasable_mols(self) -> Collection[Molecule]:
+        """Returns an explicit collection of all purchasable molecules.
+
+        For an InChIKey-only inventory there is no unique way to reconstruct a Molecule,
+        so this method is not implemented.
+        """
+        raise NotImplementedError(
+            "to_purchasable_mols is not available for InChiKeyListInventory because "
+            "molecules cannot be reconstructed from InChIKeys alone."
+        )
+
+    def __len__(self) -> int:
+        return len(self._inchikey_set)
+
+    @classmethod
+    def load_from_file(cls, path: Union[str, Path], **kwargs) -> InChiKeyListInventory:
+        """Load the inventory InChIKeys from a file."""
+        with open(path, "rt") as f_inventory:
+            return cls([line.strip() for line in f_inventory if line.strip()], **kwargs)

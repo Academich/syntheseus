@@ -44,7 +44,7 @@ from syntheseus.search.analysis.route_extraction import iter_routes_time_order
 from syntheseus.search.analysis.solution_time import get_first_solution_time
 from syntheseus.search.graph.and_or import AndOrGraph
 from syntheseus.search.graph.molset import MolSetGraph
-from syntheseus.search.mol_inventory import SmilesListInventory
+from syntheseus.search.mol_inventory import InChiKeyListInventory, SmilesListInventory
 from syntheseus.search.node_evaluation import common as node_evaluation_common
 from syntheseus.search.utils.misc import lookup_by_name
 
@@ -187,6 +187,7 @@ class BaseSearchConfig(SearchAlgorithmConfig):
     search_targets_file: str = MISSING
 
     inventory_smiles_file: str = MISSING  # Purchasable molecules
+    bb_format: str = "smiles"  # Format of building blocks: "smiles" or "inchikey"
     results_dir: str = "."  # Directory to save the results in
     append_timestamp_to_dir: bool = True  # Whether to append the current time to directory name
 
@@ -230,6 +231,12 @@ def run_from_config(config: SearchConfig) -> Path:
             "Exactly one of 'search_target' and 'search_targets_file' should be provided"
         )
 
+    # Validate bb_format
+    if config.bb_format not in ("smiles", "inchikey"):
+        raise ValueError(
+            f"bb_format must be either 'smiles' or 'inchikey', got '{config.bb_format}'"
+        )
+
     # Prepare the search targets
     search_targets: List[str] = []
     if search_target is not None:
@@ -253,9 +260,21 @@ def run_from_config(config: SearchConfig) -> Path:
     )
 
     # Set up the inventory
-    mol_inventory = SmilesListInventory.load_from_file(
-        config.inventory_smiles_file, canonicalize=config.canonicalize_inventory
-    )
+    if config.bb_format == "smiles":
+        mol_inventory = SmilesListInventory.load_from_file(
+            config.inventory_smiles_file, canonicalize=config.canonicalize_inventory
+        )
+    elif config.bb_format == "inchikey":
+        # canonicalize_inventory is not applicable for InChIKeys (they're already canonical)
+        if config.canonicalize_inventory:
+            logger.warning(
+                "canonicalize_inventory=True is ignored when bb_format='inchikey' "
+                "(InChIKeys are already canonical)"
+            )
+        mol_inventory = InChiKeyListInventory.load_from_file(config.inventory_smiles_file)
+    else:
+        # This should never happen due to validation above, but keeping for type safety
+        raise ValueError(f"Unsupported bb_format: {config.bb_format}")
 
     alg = config.search_algorithm.value(
         reaction_model=search_rxn_model,
