@@ -34,3 +34,14 @@ MANIFEST
 .coverage.*
 # pixi environments
 .pixi
+
+# Generated files
+LocalRetro*
+SmilesMedusa*
+Graph2Edits*
+RootAligned*
+Chemformer*
+RetroKNN*
+MEGAN*
+MHNreact*
+GLN*
