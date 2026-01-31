@@ -188,6 +188,8 @@ class BaseSearchConfig(SearchAlgorithmConfig):
 
     inventory_smiles_file: str = MISSING  # Purchasable molecules
     bb_format: str = "smiles"  # Format of building blocks: "smiles" or "inchikey"
+    consider_small_mols_purchasable: bool = False  # If True, molecules with <threshold heavy atoms are purchasable
+    small_mol_heavy_atom_threshold: int = 6  # Threshold when consider_small_mols_purchasable is True
     results_dir: str = "."  # Directory to save the results in
     append_timestamp_to_dir: bool = True  # Whether to append the current time to directory name
 
@@ -262,7 +264,10 @@ def run_from_config(config: SearchConfig) -> Path:
     # Set up the inventory
     if config.bb_format == "smiles":
         mol_inventory = SmilesListInventory.load_from_file(
-            config.inventory_smiles_file, canonicalize=config.canonicalize_inventory
+            config.inventory_smiles_file,
+            canonicalize=config.canonicalize_inventory,
+            consider_small_mols_purchasable=config.consider_small_mols_purchasable,
+            small_mol_heavy_atom_threshold=config.small_mol_heavy_atom_threshold,
         )
     elif config.bb_format == "inchikey":
         # canonicalize_inventory is not applicable for InChIKeys (they're already canonical)
@@ -271,7 +276,11 @@ def run_from_config(config: SearchConfig) -> Path:
                 "canonicalize_inventory=True is ignored when bb_format='inchikey' "
                 "(InChIKeys are already canonical)"
             )
-        mol_inventory = InChiKeyListInventory.load_from_file(config.inventory_smiles_file)
+        mol_inventory = InChiKeyListInventory.load_from_file(
+            config.inventory_smiles_file,
+            consider_small_mols_purchasable=config.consider_small_mols_purchasable,
+            small_mol_heavy_atom_threshold=config.small_mol_heavy_atom_threshold,
+        )
     else:
         # This should never happen due to validation above, but keeping for type safety
         raise ValueError(f"Unsupported bb_format: {config.bb_format}")

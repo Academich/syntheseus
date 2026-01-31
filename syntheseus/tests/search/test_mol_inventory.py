@@ -104,3 +104,35 @@ def test_to_purchasable_mols(example_inventory: SmilesListInventory) -> None:
     expected_set = {Molecule(sm) for sm in PURCHASABLE_SMILES}
     observed_set = set(example_inventory.to_purchasable_mols())
     assert expected_set == observed_set
+
+
+def test_consider_small_mols_purchasable_smiles() -> None:
+    """With consider_small_mols_purchasable=True, molecules with <6 heavy atoms are purchasable."""
+    inventory = SmilesListInventory(["CC"], consider_small_mols_purchasable=True)
+    # Small molecules not in list are purchasable
+    assert inventory.is_purchasable(Molecule("C"))  # 1 heavy atom
+    assert inventory.is_purchasable(Molecule("O"))  # 1 heavy atom
+    assert inventory.is_purchasable(Molecule("CCO"))  # 3 heavy atoms
+    # Molecule with 6 heavy atoms is not purchasable unless in list
+    assert not inventory.is_purchasable(Molecule("c1ccccc1"))  # benzene, 6 heavy atoms
+    # Molecule in list is still purchasable
+    assert inventory.is_purchasable(Molecule("CC"))
+
+
+def test_consider_small_mols_purchasable_inchikey() -> None:
+    """With consider_small_mols_purchasable=True, molecules with <6 heavy atoms are purchasable."""
+    inventory = InChiKeyListInventory(PURCHASABLE_INCHIKEYS, consider_small_mols_purchasable=True)
+    assert inventory.is_purchasable(Molecule("C"))
+    assert not inventory.is_purchasable(Molecule("c1ccccc1"))
+
+
+def test_small_mol_heavy_atom_threshold_configurable() -> None:
+    """small_mol_heavy_atom_threshold controls the cutoff (mols with < threshold heavy atoms)."""
+    # Threshold 3: only molecules with 0, 1, or 2 heavy atoms are "small"
+    inventory = SmilesListInventory(
+        [], consider_small_mols_purchasable=True, small_mol_heavy_atom_threshold=3
+    )
+    assert inventory.is_purchasable(Molecule("C"))  # 1
+    assert inventory.is_purchasable(Molecule("CC"))  # 2
+    assert not inventory.is_purchasable(Molecule("CCO"))  # 3, not < 3
+    assert not inventory.is_purchasable(Molecule("c1ccccc1"))  # 6

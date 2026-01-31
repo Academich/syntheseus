@@ -57,18 +57,44 @@ class ExplicitMolInventory(BaseMolInventory):
         """Return the number of purchasable molecules in the inventory."""
 
 
-class SmilesListInventory(ExplicitMolInventory):
+class SmallMolsPurchasableMixin:
+    """Mixin that treats molecules with fewer than a threshold of heavy atoms as purchasable.
+
+    Subclasses must set _consider_small_mols_purchasable and _small_mol_heavy_atom_threshold
+    in their __init__, and call _is_small_mol_purchasable(mol) at the start of is_purchasable.
+    """
+
+    def _is_small_mol_purchasable(self, mol: Molecule) -> bool:
+        """Return True if small-mols-as-purchasable is enabled and mol is below the threshold."""
+        if not self._consider_small_mols_purchasable:
+            return False
+        return mol.rdkit_mol.GetNumHeavyAtoms() < self._small_mol_heavy_atom_threshold
+
+
+class SmilesListInventory(ExplicitMolInventory, SmallMolsPurchasableMixin):
     """Most common type of inventory: a list of purchasable SMILES."""
 
-    def __init__(self, smiles_list: list[str], canonicalize: bool = True):
+    def __init__(
+        self,
+        smiles_list: list[str],
+        canonicalize: bool = True,
+        *,
+        consider_small_mols_purchasable: bool = False,
+        small_mol_heavy_atom_threshold: int = 6,
+    ):
         if canonicalize:
             # For canonicalization we sequence `MolFromSmiles` and `MolToSmiles` to exactly match
             # the process employed in the `Molecule` class.
             smiles_list = [Chem.MolToSmiles(Chem.MolFromSmiles(s)) for s in smiles_list]
 
         self._smiles_set = set(smiles_list)
+        self._consider_small_mols_purchasable = consider_small_mols_purchasable
+        self._small_mol_heavy_atom_threshold = small_mol_heavy_atom_threshold
 
     def is_purchasable(self, mol: Molecule) -> bool:
+        if self._is_small_mol_purchasable(mol):
+            return True
+
         if mol.identifier is not None:
             warnings.warn(
                 f"Molecule identifier {mol.identifier} will be ignored during inventory lookup"
@@ -89,17 +115,29 @@ class SmilesListInventory(ExplicitMolInventory):
             return cls([line.strip() for line in f_inventory], **kwargs)
 
 
-class InChiKeyListInventory(ExplicitMolInventory):
+class InChiKeyListInventory(ExplicitMolInventory, SmallMolsPurchasableMixin):
     """Inventory of purchasable molecules represented by InChIKeys.
 
     This is useful when the building blocks are provided as InChIKeys rather than SMILES.
     """
 
-    def __init__(self, inchikey_list: list[str], **_: object):
+    def __init__(
+        self,
+        inchikey_list: list[str],
+        *,
+        consider_small_mols_purchasable: bool = False,
+        small_mol_heavy_atom_threshold: int = 6,
+        **_kwargs: object,
+    ):
         # InChIKeys are already canonical identifiers, so we just store the stripped keys.
         self._inchikey_set = {ikey.strip() for ikey in inchikey_list if ikey.strip()}
+        self._consider_small_mols_purchasable = consider_small_mols_purchasable
+        self._small_mol_heavy_atom_threshold = small_mol_heavy_atom_threshold
 
     def is_purchasable(self, mol: Molecule) -> bool:
+        if self._is_small_mol_purchasable(mol):
+            return True
+
         if mol.identifier is not None:
             warnings.warn(
                 f"Molecule identifier {mol.identifier} will be ignored during inventory lookup"
