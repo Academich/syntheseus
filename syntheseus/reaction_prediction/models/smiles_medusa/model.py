@@ -435,7 +435,7 @@ class SmilesToSmilesAutoregressiveMedusaModel(pl.LightningModule):
 
         return optimizer
 
-    def generate(self, src_token_ids: 'torch.LongTensor') -> list['torch.LongTensor']:
+    def generate(self, src_token_ids: 'torch.LongTensor') -> tuple['torch.LongTensor', 'torch.Tensor']:
         b_size = src_token_ids.shape[0]
 
         n_drafts, draft_len = 1, self.medusa_heads_num
@@ -632,8 +632,7 @@ class SmilesToSmilesAutoregressiveMedusaModel(pl.LightningModule):
             possible_draft_len = self.max_len - postn_after_the_last_meaning_token - 1
             #   -> (b_size, 1)
         self.classic_model_calls_num += (new_candidates != self.pad_token_idx).sum(-1).max().item() - 1
-
-        return new_candidates.reshape(b_size, self.beam_size, -1)#, new_log_probs.reshape(b_size, self.beam_size).exp()
+        return new_candidates.reshape(b_size, self.beam_size, -1), new_log_probs.reshape(b_size, self.beam_size).exp()
 
     def calculate_n_accepted_in_drafts(self, draft_tokens, masked_probs):
         """

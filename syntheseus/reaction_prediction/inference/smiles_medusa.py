@@ -57,8 +57,10 @@ class SmilesMedusaModel(ExternalBackwardReactionModel):
 
     def _get_reactions(self, inputs: list[Molecule], num_results: int) -> list[Sequence[SingleProductReaction]]:
         src = self._mols_to_batch(inputs)
-        output_batch = self.model.generate(src)
+        output_batch, output_batch_probs = self.model.generate(src)
+        output_batch_probs = output_batch_probs.detach().cpu().tolist()
         output_smiles = [self.tokenizer.decode_batch(b) for b in output_batch.cpu().tolist()]
-        # TODO add metadata
-        metadata = [[{"probability": 1.0}] * len(output) for output in output_smiles]
+        metadata = []
+        for lst in output_batch_probs:
+            metadata.append([{"probability": prob} for prob in lst])
         return [process_raw_smiles_outputs_backwards(inp, output, metadata) for inp, output, metadata in zip(inputs, output_smiles, metadata)]
